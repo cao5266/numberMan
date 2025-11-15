@@ -1,5 +1,6 @@
 import json
 import os
+import sys
 from contextlib import asynccontextmanager
 import re
 import asyncio
@@ -7,11 +8,29 @@ import base64
 from fastapi.responses import StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi import FastAPI, Request, UploadFile, File,HTTPException,WebSocketDisconnect,WebSocket
+
+# 获取脚本所在目录
+script_dir = os.path.dirname(os.path.abspath(__file__))
+# 获取项目根目录（web_demo 的父目录）
+project_root = os.path.dirname(script_dir) if os.path.basename(script_dir) == "web_demo" else script_dir
+
+# 添加 web_demo 目录到 Python 路径，以便导入 voiceapi
+web_demo_dir = script_dir if os.path.basename(script_dir) == "web_demo" else os.path.join(project_root, "web_demo")
+if web_demo_dir not in sys.path:
+    sys.path.insert(0, web_demo_dir)
+
+# 在路径设置之后导入 voiceapi 模块
 from voiceapi.asr import start_asr_stream, ASRResult,ASREngineManager
 import uvicorn
 import argparse
 from voiceapi.llm import llm_stream
 from voiceapi.tts import get_audio,TTSEngineManager
+
+# 静态文件目录
+static_dir = os.path.join(script_dir, "static")
+if not os.path.exists(static_dir):
+    # 如果在项目根目录运行，尝试 web_demo/static
+    static_dir = os.path.join(project_root, "web_demo", "static")
 
 # 2. 生命周期管理
 @asynccontextmanager
@@ -30,7 +49,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 # 挂载静态文件
-app.mount("/static", StaticFiles(directory="web_demo/static"), name="static")
+app.mount("/static", StaticFiles(directory=static_dir), name="static")
 
 
 def split_sentence(sentence, min_length=10):
@@ -182,12 +201,24 @@ async def eb_stream(request: Request):
 
 # 启动Uvicorn服务器
 if __name__ == "__main__":
-    models_root = './models'
-
-    for d in ['.', '..', 'web_demo']:
-        if os.path.isdir(f'{d}/models'):
-            models_root = f'{d}/models'
+    # 查找 models 目录
+    models_root = None
+    possible_models_dirs = [
+        os.path.join(project_root, 'models'),
+        os.path.join(script_dir, 'models'),
+        os.path.join(project_root, 'web_demo', 'models'),
+        './models',
+        '../models',
+        'web_demo/models'
+    ]
+    
+    for d in possible_models_dirs:
+        if os.path.isdir(d):
+            models_root = d
             break
+    
+    if not models_root:
+        models_root = os.path.join(project_root, 'models')
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--port", type=int, default=8888, help="port number")

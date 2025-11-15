@@ -1,9 +1,37 @@
-kaldi_native_fbank
+# 核心依赖
+torch
+torchvision
+torchaudio
+numpy<2.0.0
+opencv-python
+
+# 音频处理
+kaldi-native-fbank
+soundfile
+sherpa-onnx
+
+# 图像处理和计算机视觉
 mediapipe
-tqdm
+scipy
+
+# 机器学习
 scikit-learn
+tqdm
+
+# 3D渲染和图形
 pyglm
 glfw
 PyOpenGL
-gradio
-sherpa-onnx
+
+# Web框架
+gradio>=5.0.0
+fastapi
+uvicorn
+requests
+
+# API服务
+openai
+
+# 其他工具
+pandas
+pillow

@@ -1,13 +1,13 @@
 from openai import OpenAI
 # 豆包
-base_url = "https://ark.cn-beijing.volces.com/api/v3"
-api_key = ""
-model_name = "doubao-pro-32k-character-241215"
+# base_url = "https://ark.cn-beijing.volces.com/api/v3"
+# api_key = ""
+# model_name = "doubao-pro-32k-character-241215"
 
 # # DeepSeek
-# base_url = "https://api.deepseek.com"
-# api_key = ""
-# model_name = "deepseek-chat"
+base_url = "https://api.deepseek.com"
+api_key = "sk-7bdc0a3467194ad8890328f0a2d23e22"
+model_name = "deepseek-chat"
 
 assert api_key, "您必须配置自己的LLM API秘钥"
 

@@ -33,8 +33,12 @@ def interface_mini(path, wav_path, output_video_path):
 
     # 读取 Gzip 压缩的 JSON 文件
     combined_data_path = os.path.join(path, "combined_data.json.gz")
-    with gzip.open(combined_data_path, 'rt', encoding='UTF-8') as f:
-        combined_data = json.load(f)
+    try:
+        with gzip.open(combined_data_path, 'rt', encoding='UTF-8') as f:
+            combined_data = json.load(f)
+    except Exception as e:
+        print(f"读取combined_data.json.gz文件失败: {e}")
+        return
 
     # 从 combined_data 中提取数据
     face3D_obj = combined_data["face3D_obj"]

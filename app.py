@@ -3,8 +3,9 @@ import shutil
 import gradio as gr
 import subprocess
 import uuid
-from data_preparation_mini import data_preparation_mini
-from data_preparation_web import data_preparation_web
+# 延迟导入，避免启动时加载所有依赖
+# from data_preparation_mini import data_preparation_mini
+# from data_preparation_web import data_preparation_web
 
 
 # 自定义 CSS 样式
@@ -21,6 +22,10 @@ video_dir_path = ""
 # 假设你已经有了这两个函数
 def data_preparation(video1, resize_option):
     global video_dir_path
+    # 延迟导入，避免启动时加载所有依赖
+    from data_preparation_mini import data_preparation_mini
+    from data_preparation_web import data_preparation_web
+    
     # 处理视频的逻辑
     video_dir_path = "video_data/{}".format(uuid.uuid4())
     data_preparation_mini(video1, video_dir_path, resize_option)
@@ -178,5 +183,30 @@ def create_interface():
 
 # 创建 Gradio 界面并启动
 if __name__ == "__main__":
+    import os
+    # 设置环境变量，禁用 Gradio 的 API 文档生成（解决 bug）
+    os.environ["GRADIO_SERVER_NAME"] = "127.0.0.1"
+    
     demo = create_interface()
-    demo.launch()
+    # 使用最简单的启动方式，避免 API 文档生成的 bug
+    try:
+        demo.launch(
+            server_name="127.0.0.1", 
+            server_port=7860, 
+            share=False,
+            inbrowser=False,  # 不自动打开浏览器
+            show_error=True
+        )
+    except ValueError as e:
+        # 如果 localhost 访问失败，尝试使用 0.0.0.0
+        if "localhost is not accessible" in str(e):
+            print("localhost 访问失败，尝试使用 0.0.0.0...")
+            demo.launch(
+                server_name="0.0.0.0",
+                server_port=7860,
+                share=False,
+                inbrowser=False,
+                show_error=True
+            )
+        else:
+            raise
