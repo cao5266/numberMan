@@ -1,5 +1,7 @@
-let server_url = "http://localhost:8888/eb_stream"
-let websocket_url = "ws://localhost:8888/asr?samplerate=16000"
+// 自动使用当前页面的协议和域名
+let server_url = window.location.origin + "/eb_stream"
+// WebSocket URL: http/https 对应 ws/wss
+let websocket_url = (window.location.protocol === 'https:' ? 'wss://' : 'ws://') + window.location.host + '/asr?samplerate=16000'
 let ws = null;   // ASR使用websocket双向流式连接
 let isVoiceMode = true;                 // 默认使用语音模式
 

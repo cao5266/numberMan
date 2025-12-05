@@ -1,37 +1,37 @@
-# 核心依赖
+# Core dependencies
 torch
 torchvision
 torchaudio
 numpy<2.0.0
 opencv-python
 
-# 音频处理
+# Audio processing
 kaldi-native-fbank
 soundfile
 sherpa-onnx
 
-# 图像处理和计算机视觉
+# Image processing and computer vision
 mediapipe
 scipy
 
-# 机器学习
+# Machine learning
 scikit-learn
 tqdm
 
-# 3D渲染和图形
+# 3D rendering and graphics
 pyglm
 glfw
 PyOpenGL
 
-# Web框架
+# Web framework
 gradio>=5.0.0
 fastapi
 uvicorn
 requests
 
-# API服务
+# API service
 openai
 
-# 其他工具
+# Other tools
 pandas
 pillow
