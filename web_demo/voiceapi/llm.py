@@ -1,15 +1,11 @@
+import os
 from openai import OpenAI
-# 豆包
-# base_url = "https://ark.cn-beijing.volces.com/api/v3"
-# api_key = ""
-# model_name = "doubao-pro-32k-character-241215"
 
-# # DeepSeek
-base_url = "https://api.deepseek.com"
-api_key = "sk-7bdc0a3467194ad8890328f0a2d23e22"
-model_name = "deepseek-chat"
-
-assert api_key, "您必须配置自己的LLM API秘钥"
+# 豆包（火山引擎）配置
+# 优先使用环境变量，如果没有则使用默认密钥
+api_key = os.getenv('ARK_API_KEY') or "54f5bb90-9d1d-4b8d-bc3d-952d658d2372"
+base_url = "https://ark.cn-beijing.volces.com/api/v3"
+model_name = "doubao-seed-1-6-251015"
 
 llm_client = OpenAI(
     base_url=base_url,
@@ -17,15 +13,17 @@ llm_client = OpenAI(
 )
 
 
-def llm_stream(prompt):
+def llm_stream(prompt, system_prompt=None):
+    if not system_prompt:
+        system_prompt = "你是人工智能助手"
+    # 强制要求不生成表情符号（因为TTS无法朗读）
+    system_prompt += "\n\n【重要】你的回复将被语音合成，请不要使用任何表情符号（emoji）、特殊符号或颜文字。"
     stream = llm_client.chat.completions.create(
-        # 指定您创建的方舟推理接入点 ID，此处已帮您修改为您的推理接入点 ID
         model=model_name,
         messages=[
-            {"role": "system", "content": "你是人工智能助手"},
+            {"role": "system", "content": system_prompt},
             {"role": "user", "content": prompt},
         ],
-        # 响应内容是否流式返回
         stream=True,
     )
     return stream

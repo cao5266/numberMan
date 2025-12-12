@@ -186,8 +186,8 @@ PUNCTUATION_SET = {
     ',', '.', '!', '?', ';', ':', '(', ')', '[', ']', '"', "'"
 }
 
-async def gen_stream(prompt, asr = False, voice_speed=None, voice_id=None):
-    print("gen_stream", voice_speed, voice_id)
+async def gen_stream(prompt, asr = False, voice_speed=None, voice_id=None, system_prompt=None):
+    print("gen_stream", voice_speed, voice_id, "system_prompt:", system_prompt[:50] if system_prompt else None)
     if asr:
         chunk = {
             "prompt": prompt
@@ -198,7 +198,7 @@ async def gen_stream(prompt, asr = False, voice_speed=None, voice_id=None):
         # 使用真实大模型流式返回
         try:
             print("----- streaming request -----")
-            stream = llm_stream(prompt)
+            stream = llm_stream(prompt, system_prompt=system_prompt)
             llm_answer_cache = ""
             
             for chunk in stream:
@@ -312,6 +312,7 @@ async def eb_stream(request: Request):
         input_mode = body.get("input_mode")
         voice_speed = body.get("voice_speed")
         voice_id = body.get("voice_id")
+        system_prompt = body.get("system_prompt")  # 获取系统提示词
 
         if input_mode == "audio":
             base64_audio = body.get("audio")
@@ -319,10 +320,10 @@ async def eb_stream(request: Request):
             audio_data = base64.b64decode(base64_audio)
             # 这里可以添加对音频数据的处理逻辑
             prompt = await call_asr_api(audio_data)  # 假设 call_asr_api 可以处理音频数据
-            return StreamingResponse(gen_stream(prompt, asr=True, voice_speed=voice_speed, voice_id=voice_id), media_type="application/json")
+            return StreamingResponse(gen_stream(prompt, asr=True, voice_speed=voice_speed, voice_id=voice_id, system_prompt=system_prompt), media_type="application/json")
         elif input_mode == "text":
             prompt = body.get("prompt")
-            return StreamingResponse(gen_stream(prompt, asr=False, voice_speed=voice_speed, voice_id=voice_id), media_type="application/json")
+            return StreamingResponse(gen_stream(prompt, asr=False, voice_speed=voice_speed, voice_id=voice_id, system_prompt=system_prompt), media_type="application/json")
         else:
             raise HTTPException(status_code=400, detail="Invalid input mode")
     except Exception as e:

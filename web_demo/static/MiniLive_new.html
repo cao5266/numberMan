@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="en-us">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
@@ -17,7 +18,8 @@
             overflow: hidden;
         }
 
-        video, canvas {
+        video,
+        canvas {
             border: 2px solid #ccc;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
@@ -67,19 +69,21 @@
             color: #333;
             z-index: -2;
         }
-
-        #dropdownContainer, #voiceDropdownContainer {
+        #dropdownContainer,
+        #voiceDropdownContainer {
+            display: none;
             position: absolute;
             top: 20px;
             left: 20px;
             z-index: 10;
         }
 
-        #voiceDropdownContainer {
-            top: 70px;
-        }
+        /* #voiceDropdownContainer {
+            top: 0;
+        } */
 
-        #characterDropdown, #voiceDropdown {
+        #characterDropdown,
+        #voiceDropdown {
             appearance: none;
             -webkit-appearance: none;
             -moz-appearance: none;
@@ -96,17 +100,20 @@
             transition: all 0.3s ease;
         }
 
-        #characterDropdown:hover, #voiceDropdown:hover {
+        #characterDropdown:hover,
+        #voiceDropdown:hover {
             border-color: #888;
             box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
         }
 
-        #characterDropdown:focus, #voiceDropdown:focus {
+        #characterDropdown:focus,
+        #voiceDropdown:focus {
             border-color: #555;
             box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
         }
 
-        #dropdownContainer::after, #voiceDropdownContainer::after {
+        #dropdownContainer::after,
+        #voiceDropdownContainer::after {
             content: '▼';
             position: absolute;
             top: 50%;
@@ -116,9 +123,11 @@
             color: #666;
             font-size: 12px;
         }
+
         #canvasEl {
             position: absolute;
-            left: -9999px;  /* 移出可视区域 */
+            left: -9999px;
+            /* 移出可视区域 */
             top: -9999px;
             /* 保持canvas正常尺寸 */
             width: 300px;
@@ -126,13 +135,14 @@
         }
     </style>
 </head>
+
 <body>
     <div id="dropdownContainer">
         <select id="characterDropdown">
             <option value="assets">男性一</option>
             <option value="assets2">女性一</option>
-    <option value="kaka">kaka</option>
-</select>
+            <option value="kaka">kaka</option>
+        </select>
     </div>
     <div id="voiceDropdownContainer">
         <select id="voiceDropdown">
@@ -153,10 +163,70 @@
     <iframe id="screen2" src="dialog.html" frameborder="0" style="display: none;"></iframe>
     <div id="startMessage">加载中</div>
 
-    <script src="js/pako.min.js"></script>-->
+    <script src="js/pako.min.js"></script>
     <script src="js/mp4box.all.min.js"></script>
     <script src="js/DHLiveMini.js"></script>
     <script src="js/MiniMateLoader.js"></script>
     <script src="js/MiniLive2.js"></script>
+
+    <script>
+        // URL 参数处理逻辑 - 立即执行部分（在 DOM 加载前）
+        (function() {
+            // 获取 URL 参数
+            const urlParams = new URLSearchParams(window.location.search);
+            const characterName = urlParams.get('name');
+
+            // 定义可用的数字人列表（需要与下拉框选项保持一致）
+            const availableCharacters = ['assets', 'assets2', 'kaka'];
+
+            if (characterName) {
+                // 验证 name 是否在可用列表中
+                if (availableCharacters.includes(characterName)) {
+                    // 匹配成功，立即设置 asset_dir（在 newVideoTask 调用前）
+                    console.log('URL 参数匹配到数字人:', characterName);
+                    asset_dir = characterName;
+
+                    // DOM 加载后处理 UI 显示
+                    document.addEventListener('DOMContentLoaded', function() {
+                        // 隐藏下拉框
+                        const dropdownContainer = document.getElementById('dropdownContainer');
+                        if (dropdownContainer) {
+                            dropdownContainer.style.display = 'none';
+                        }
+
+                        // 设置下拉框的选中项
+                        const characterDropdown = document.getElementById('characterDropdown');
+                        if (characterDropdown) {
+                            const options = characterDropdown.options;
+                            for (let i = 0; i < options.length; i++) {
+                                if (options[i].value === characterName) {
+                                    characterDropdown.selectedIndex = i;
+                                    break;
+                                }
+                            }
+                        }
+                    });
+                } else {
+                    // 匹配失败，DOM 加载后显示错误提示
+                    console.error('数字人不存在:', characterName);
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const startMessage = document.getElementById('startMessage');
+                        if (startMessage) {
+                            startMessage.textContent = '数字人不存在：' + characterName;
+                            startMessage.style.color = 'red';
+                            startMessage.style.display = 'block';
+                        }
+
+                        // 隐藏下拉框（即使失败也隐藏，避免用户困惑）
+                        const dropdownContainer = document.getElementById('dropdownContainer');
+                        if (dropdownContainer) {
+                            dropdownContainer.style.display = 'none';
+                        }
+                    });
+                }
+            }
+        })();
+    </script>
 </body>
+
 </html>

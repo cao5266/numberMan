@@ -1,5 +1,22 @@
 // 自动使用当前页面的协议和域名
 let server_url = window.location.origin + "/eb_stream"
+
+// 从 URL 参数获取系统提示词（优先从父页面获取）
+function getSystemPrompt() {
+    // 优先从父页面获取 URL 参数
+    let searchString = window.location.search;
+    try {
+        if (window.parent && window.parent !== window) {
+            searchString = window.parent.location.search;
+        }
+    } catch (e) {
+        // 跨域时可能无法访问 parent.location
+        console.log('无法访问父页面 URL，使用当前页面 URL');
+    }
+    const urlParams = new URLSearchParams(searchString);
+    const systemPrompt = urlParams.get('systemPrompt');
+    return systemPrompt || null;
+}
 let audioQueue = []; // 存储待播放的音频数据
 let isPlaying = false; // 标记是否正在播放音频
 let audioContext; // 定义在全局以便在用户交互后创建或恢复
@@ -195,7 +212,7 @@ function sendTextMessage() {
         fetch(server_url, {
             method: 'post',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({"input_mode": "text", 'prompt': inputValue, 'voice_id': characterName, 'voice_speed': "" }),
+            body: JSON.stringify({"input_mode": "text", 'prompt': inputValue, 'voice_id': characterName, 'voice_speed': "", 'system_prompt': getSystemPrompt() }),
             signal: controller.signal
         })
             .then(response => response.body)
@@ -280,7 +297,8 @@ function sendAudioMessage(audioBlob) {
             input_mode: "audio",
             audio: base64Audio,
             voice_speed: "", // 可以根据需要调整
-            voice_id: characterName // 可以根据需要调整
+            voice_id: characterName, // 可以根据需要调整
+            system_prompt: getSystemPrompt() // 系统提示词
         };
 
         fetch(server_url, {
